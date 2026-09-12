@@ -3,16 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>منصة ألعاب السيارات والكورة</title>
-    <link rel="stylesheet" href="style.css">
+    <title>لعبتي الخاصة: سيارات وكورة</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: white;
+            text-align: center;
+            font-family: Tahoma, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        canvas {
+            background-color: #1b4d3e; /* لون عشب الملعب */
+            border: 4px solid #ffffff;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            display: block;
+            margin: 20px auto;
+        }
+    </style>
 </head>
 <body>
-    <h1>حلبة ألعاب السيارات وكرة القدم</h1>
-    <p>اختر لعبتك المفضلة، وانطلق في الحلبة أو الملعب مباشرة!</p>
-    
-    <div class="game-container">
-        <!-- لعبة سيارات وسباق ممتعة -->
-        <iframe src="https://g.vseigru.net/7/igra-supper-gonshik-na-mashine/" width="800" height="500" style="border:none;"></iframe>
-    </div>
+
+    <h1>ملعب سيارات وكورة القدم</h1>
+    <p>استخدم أزرار الأسهم (أو مفاتيح W A S D) لتحريك سيارتك وضرب الكورة!</p>
+
+    <!-- شاشة اللعبة (الملعب) -->
+    <canvas id="gameCanvas" width="800" height="400"></canvas>
+
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        // إحداثيات وخصائص السيارة
+        let car = {
+            x: 100,
+            y: 180,
+            width: 60,
+            height: 30,
+            speed: 5,
+            color: "#ff3333"
+        };
+
+        // إحداثيات وخصائص الكورة
+        let ball = {
+            x: 400,
+            y: 200,
+            radius: 15,
+            color: "#ffffff"
+        };
+
+        // تتبع الأزرار المضغوطة لوحة المفاتيح
+        let keys = {};
+        window.addEventListener("keydown", (e) => keys[e.key] = true);
+        window.addEventListener("keyup", (e) => keys[e.key] = false);
+
+        // تحديث مواقع العناصر وحركة اللعبة
+        function update() {
+            // حركة السيارة بالأزرار
+            if ((keys["ArrowUp"] || keys["w"]) && car.y > 0) car.y -= car.speed;
+            if ((keys["ArrowDown"] || keys["s"]) && car.y < canvas.height - car.height) car.y += car.speed;
+            if ((keys["ArrowLeft"] || keys["a"]) && car.x > 0) car.x -= car.speed;
+            if ((keys["ArrowRight"] || keys["d"]) && car.x < canvas.width - car.width) car.x += car.speed;
+
+            // اصطدام السيارة بالكورة لتحريكها
+            let distX = (car.x + car.width / 2) - ball.x;
+            let distY = (car.y + car.height / 2) - ball.y;
+            let distance = Math.sqrt(distX * distX + distY * distY);
+
+            if (distance < ball.radius + 30) {
+                ball.x += 4; // دفع الكورة للأمام عند الاصطدام
+            }
+        }
+
+        // رسم الملعب، السيارة، والكورة على الشاشة
+        function draw() {
+            // مسح الشاشة لتحديث الإطار
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // خط منتصف الملعب (الدائرة والمنتصف)
+            ctx.strokeStyle = "rgba(255,255,255,0.3)";
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.arc(canvas.width / 2, canvas.height / 2, 70, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // رسم السيارة
+            ctx.fillStyle = car.color;
+            ctx.fillRect(car.x, car.y, car.width, car.height);
+
+            // رسم الكورة
+            ctx.fillStyle = ball.color;
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // تشغيل حلقة اللعبة المستمرة (Game Loop)
+        function loop() {
+            update();
+            draw();
+            requestAnimationFrame(loop);
+        }
+
+        loop();
+    </script>
 </body>
 </html>
